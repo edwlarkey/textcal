@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+# Author: Edward G. Larkey (edwlarkey at mac dot com)
+# Copyright: Copyright (c) 2014 Edward G. Larkey
+# License: GPLv3
+
+# Calendar location
+CALENDAR=~/path/to/calendar.textcal
+
+# Loction of generate_calendar.py
+# GENERATE=~/bin/generate_calendar.py
+
+# Current DAte
+DATE=$(date +%Y-%m-%d)
+
+function usage() {
+    echo """
+    text-calendar [options]
+
+    When run without options, calendar is opened in vim at the current date.
+
+    -h: this usage message
+    -s: edit calendar in vim with search (e.g. -s 05-02)
+
+    See http://github.com/edwlarkey/textcal.vim for syntax highlighting
+    .textcal files
+
+    """
+}
+
+# Generate calendar.
+# Get location of generate_calendar.py and include year argument.
+#function generate() {
+#    $GENERATE $1
+#}
+
+# Edit calendar in vim. If argument, then search.
+function edit() {
+    vim +/$1 $CALENDAR
+}
+
+
+# Get options and arguments.
+while getopts ":hes:g:" o; do
+    case "${o}" in
+        s)
+            s=${OPTARG}
+            ;;
+#        g)
+#            g=${OPTARG}
+#            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+# Generate or Edit with search
+# if [[ ${g} || ${s} ]]; then
+#     if [[ ${g} ]]; then
+#         generate ${g}
+#     elif [[ ${s} ]]; then
+#         edit ${s}
+#     fi
+
+if [[ ${s} ]]; then
+    edit ${s}
+# If no options, open calendar in vim to current date
+else
+    edit $DATE
+fi

@@ -1,15 +1,18 @@
 # textcal
 
-A glorified alias to open a specific file in vim to a specific line.
+Generate calendar for year in plain text and open that calendar to a specific
+date in vim.
 
 ## Features
 
+* Generate a calendar for a year in plain text.
 * Open text calendar to today's date in vim.
 * Open text calendar to specific date in vim
 
 ## Requirements
 
-* Python 3
+* Python
+* [docopt](http://docopt.org/)
 
 ## Setup & Usage
 
@@ -17,6 +20,8 @@ A glorified alias to open a specific file in vim to a specific line.
 
 2. Move `textcal` to `~/bin` or somewhere else in your path.
 
-3. Edit `textcal` to the reflect the location of your calendar. Usually a `.textcal` file
+3. Generate a calendar with `textcal --generate 2014 > 2014.textcal`
 
-4. Open calendar with `textcal` to go to today's date OR use `textcal -s 05-02` to go to May 2nd (or any other date you choose)
+4. Edit `textcal` to the reflect the location of your CALENDAR.
+
+5. Open calendar with `textcal` to go to today's date OR use `textcal --show 05-02` to go to May 2nd.

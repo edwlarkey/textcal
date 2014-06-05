@@ -1,75 +1,114 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
 
-# Author: Edward G. Larkey (edwlarkey at mac dot com)
-# Copyright: Copyright (c) 2014 Edward G. Larkey
-# License: GPLv3
+"""Usage:
+    textcal
+    textcal --generate <year>
+    textcal --show <date>
+    textcal -h | --help
+    textcal --version
 
-# Calendar location
-CALENDAR=~/path/to/calendar.textcal
+Options:
+    -h --help   Show this screen.
+    --version   Show version.
+    --generate  Generate a calendar for year.
+    --show      Show a date in vim (yyyy-mm-dd)
 
-# Loction of generate_calendar.py
-# GENERATE=~/bin/generate_calendar.py
+"""
 
-# Current DAte
-DATE=$(date +%Y-%m-%d)
+CALENDAR = "/path/to/calendar.textcal"
 
-function usage() {
-    echo """
-    text-calendar [options]
+__version__ = "0.0.1"
 
-    When run without options, calendar is opened in vim at the current date.
+import docopt
+from subprocess import call
+import calendar
+import datetime
 
-    -h: this usage message
-    -s: edit calendar in vim with search (e.g. -s 05-02)
 
-    See http://github.com/edwlarkey/textcal.vim for syntax highlighting
-    .textcal files
+def print_calendar(year, month):
+    """Prints a text calendar of the year and month supplied."""
 
+    cal = calendar.month(year, month)
+    print(cal)
+
+
+def print_days(year, month):
     """
-}
+    Prints each day in a month in the format:
+    YYYY-MM-DD  A[:1]  :
+    """
+    day = 1
+    last_day = calendar.monthrange(year, month)[1]
 
-# Generate calendar.
-# Get location of generate_calendar.py and include year argument.
-#function generate() {
-#    $GENERATE $1
-#}
+    while day <= last_day:
+        # date
+        date = datetime.date(year, month, day)
 
-# Edit calendar in vim. If argument, then search.
-function edit() {
-    vim +/$1 $CALENDAR
-}
+        # string date
+        strdate = date.strftime('%Y-%m-%d')
+
+        # full day of week
+        dow = date.strftime('%A')
+
+        # convert day of week(dow) into single character dayofweek
+        if dow == "Monday":
+            dayofweek = 'M'
+        elif dow == "Tuesday":
+            dayofweek = 'T'
+        elif dow == "Wednesday":
+            dayofweek = 'W'
+        elif dow == "Thursday":
+            dayofweek = 'R'
+        elif dow == "Friday":
+            dayofweek = 'F'
+        else:
+            dayofweek = 'S'
+
+        # if it is the beginning of the week, print a new line first.
+        if dayofweek == 'M':
+            print("")
+            print("%s  %s  :" % (strdate, dayofweek))
+        else:
+            print("%s  %s  :" % (strdate, dayofweek))
+
+        day += 1
+
+    # print ^^ at the end of the month (used for gawk printing stop pattern)
+    print("^^\n")
 
 
-# Get options and arguments.
-while getopts ":hes:g:" o; do
-    case "${o}" in
-        s)
-            s=${OPTARG}
-            ;;
-#        g)
-#            g=${OPTARG}
-#            ;;
-        h)
-            usage
-            ;;
-        *)
-            usage
-            ;;
-    esac
-done
-shift $((OPTIND-1))
+def generate_calendar(YEAR):
+    """
+    for each month of the year, print calendar and then list of dates.
+    """
 
-# Generate or Edit with search
-# if [[ ${g} || ${s} ]]; then
-#     if [[ ${g} ]]; then
-#         generate ${g}
-#     elif [[ ${s} ]]; then
-#         edit ${s}
-#     fi
+    # Month start at January
+    MONTH = 1
 
-if [[ ${s} ]]; then
-    edit ${s}
-# If no options, open calendar in vim to current date
-else
-    edit $DATE
-fi
+    while MONTH <= 12:
+        print_calendar(YEAR, MONTH)
+        print_days(YEAR, MONTH)
+        MONTH += 1
+
+
+def today():
+    """
+    Open vim at today's date
+    """
+    date = datetime.date.today()
+
+    # string date
+    strdate = date.strftime('%Y-%m-%d')
+    # open vim to today's date
+    call("vim +/" + strdate + " " + CALENDAR, shell=True)
+
+if __name__ == '__main__':
+    args = docopt.docopt(__doc__)
+    if args['--version']:
+        print("Version: " + __version__)
+    elif args['--generate']:
+        generate_calendar(int(args['<year>']))
+    elif args['--show']:
+        call("vim +/" + args['<date>'] + " " + CALENDAR, shell=True)
+    else:
+        today()

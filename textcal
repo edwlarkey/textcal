@@ -1,114 +1,137 @@
 #!/usr/bin/env python
+# coding:utf-8
 
-"""Usage:
-    textcal
-    textcal --generate <year>
-    textcal --show <date>
-    textcal -h | --help
-    textcal --version
+"""Textcal
 
-Options:
-    -h --help   Show this screen.
-    --version   Show version.
-    --generate  Generate a calendar for year.
-    --show      Show a date in vim (yyyy-mm-dd)
-
+A plain text calendar generator.
 """
 
-CALENDAR = "/path/to/calendar.textcal"
+__author__ = "Edward Larkey <edwlarkey@gmail.com>"
+__copyright__ = "Copyright (c) 2014-2015 Edward Larkey"
+__license__ = "GPL Version 3"
+__version__ = "0.1.0"
 
-__version__ = "0.0.1"
-
-import docopt
-from subprocess import call
+import os
+import argparse
+import subprocess
 import calendar
 import datetime
 
+class Textcal(object):
+    """Textcal"""
 
-def print_calendar(year, month):
-    """Prints a text calendar of the year and month supplied."""
+    def __init__(self):
+        """Main execution path"""
+        self.textcal_path = ''
+        self.args = {}
 
-    cal = calendar.month(year, month)
-    print(cal)
+        # defaults
+        self.create = False
+        self.open = False
+        self.year = ''
+        # Years start in January
+        self.month = 1
+        self.date = datetime.date.today().strftime('%Y-%m-%d')
 
+        self.read_environment()
+        self.parse_cli()
 
-def print_days(year, month):
-    """
-    Prints each day in a month in the format:
-    YYYY-MM-DD  A[:1]  :
-    """
-    day = 1
-    last_day = calendar.monthrange(year, month)[1]
+        if self.create:
+            # for each month of the year, print calendar and then list of dates.
+            while self.month <= 12:
+                self.print_calendar()
+                self.print_days()
+                self.month += 1
+        elif self.open:
+            self.open_calendar()
 
-    while day <= last_day:
-        # date
-        date = datetime.date(year, month, day)
+    def read_environment(self):
+        """Reads the settings from environment variables"""
+        # Calendar location
+        if os.getenv('TEXTCAL'):
+            self.textcal_path = os.getenv('TEXTCAL')
 
-        # string date
-        strdate = date.strftime('%Y-%m-%d')
+    def parse_cli(self):
+        """Command line argument processing"""
+        parser = argparse.ArgumentParser(description="A plain text calendar")
 
-        # full day of week
-        dow = date.strftime('%A')
+        # Version information
+        parser.add_argument('--version', action='version',
+                            version="%(prog)s: " + __version__)
 
-        # convert day of week(dow) into single character dayofweek
-        if dow == "Monday":
-            dayofweek = 'M'
-        elif dow == "Tuesday":
-            dayofweek = 'T'
-        elif dow == "Wednesday":
-            dayofweek = 'W'
-        elif dow == "Thursday":
-            dayofweek = 'R'
-        elif dow == "Friday":
-            dayofweek = 'F'
-        else:
-            dayofweek = 'S'
+        commands = parser.add_subparsers(help='Commands', dest='command')
 
-        # if it is the beginning of the week, print a new line first.
-        if dayofweek == 'M':
-            print("")
-            print("%s  %s  :" % (strdate, dayofweek))
-        else:
-            print("%s  %s  :" % (strdate, dayofweek))
+        # Create command and arguments
+        create = commands.add_parser('create', help='Create new calendar')
+        create.add_argument('-y', '--year', required=True, type=int,
+                            help="""YEAR for new calendar""")
 
-        day += 1
+        # open command and arguments
+        open = commands.add_parser('open', help='Open calendar at date')
+        open.add_argument('-d', '--date', help="""DATE to open. e.g. 02-24""")
 
-    # print ^^ at the end of the month (used for gawk printing stop pattern)
-    print("^^\n")
+        args = parser.parse_args()
 
+        if args.command == 'create':
+            self.create = True
+            self.year = args.year
+        elif args.command == 'open':
+            self.open = True
+            if args.date:
+                self.date = args.date
 
-def generate_calendar(YEAR):
-    """
-    for each month of the year, print calendar and then list of dates.
-    """
+    def print_calendar(self):
+        """Prints a text calendar of the year and month supplied."""
 
-    # Month start at January
-    MONTH = 1
+        cal = calendar.month(self.year, self.month)
+        print cal
 
-    while MONTH <= 12:
-        print_calendar(YEAR, MONTH)
-        print_days(YEAR, MONTH)
-        MONTH += 1
+    def print_days(self):
+        """Prints each day in a month in the format:
+        YYYY-MM-DD  A[:1]  :
+        """
+        day = 1
+        last_day = calendar.monthrange(self.year, self.month)[1]
 
+        while day <= last_day:
+            # date
+            date = datetime.date(self.year, self.month, day)
 
-def today():
-    """
-    Open vim at today's date
-    """
-    date = datetime.date.today()
+            # string date
+            strdate = date.strftime('%Y-%m-%d')
 
-    # string date
-    strdate = date.strftime('%Y-%m-%d')
-    # open vim to today's date
-    call("vim +/" + strdate + " " + CALENDAR, shell=True)
+            # full day of week
+            dow = date.strftime('%A')
 
-if __name__ == '__main__':
-    args = docopt.docopt(__doc__)
-    if args['--version']:
-        print("Version: " + __version__)
-    elif args['--generate']:
-        generate_calendar(int(args['<year>']))
-    elif args['--show']:
-        call("vim +/" + args['<date>'] + " " + CALENDAR, shell=True)
-    else:
-        today()
+            # convert day of week(dow) into single character dayofweek
+            if dow == "Monday":
+                dayofweek = 'M'
+            elif dow == "Tuesday":
+                dayofweek = 'T'
+            elif dow == "Wednesday":
+                dayofweek = 'W'
+            elif dow == "Thursday":
+                dayofweek = 'R'
+            elif dow == "Friday":
+                dayofweek = 'F'
+            else:
+                dayofweek = 'S'
+
+            # if it is the beginning of the week, print a new line first.
+            if dayofweek == 'M':
+                print ""
+                print "%s  %s  :" % (strdate, dayofweek)
+            else:
+                print "%s  %s  :" % (strdate, dayofweek)
+
+            day += 1
+
+        # print ^^ at the end of the month (used for gawk printing stop pattern)
+        print "^^\n"
+
+    def open_calendar(self):
+        """Open calendar to specified date"""
+        search_string = "+/%s" % (self.date)
+        subprocess.call(["vim", search_string, self.textcal_path])
+
+Textcal()

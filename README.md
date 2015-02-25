@@ -1,7 +1,6 @@
 # textcal
 
-Generate calendar for year in plain text and open that calendar to a specific
-date in vim.
+A plain text calendar generator
 
 ## Features
 
@@ -12,16 +11,27 @@ date in vim.
 ## Requirements
 
 * Python
-* [docopt](http://docopt.org/)
 
-## Setup & Usage
+## Setup
 
-1. Make `textcal` executable with `chmod +x textcal`
+1. Add `textcal` to your $PATH
+1. Set `TEXTCAL=/path/to/calendar` in .bashrc or equivalent
+1. Generate calendar `textcal create -y 2015 > /path/to/calendar`
+1. Open calendar on today's date `textcal open`
 
-2. Move `textcal` to `~/bin` or somewhere else in your path.
+## Usage
 
-3. Generate a calendar with `textcal --generate 2014 > 2014.textcal`
+```
+usage: textcal [-h] [--version] {create,open} ...
 
-4. Edit `textcal` to the reflect the location of your CALENDAR.
+A plaintext calendar
 
-5. Open calendar with `textcal` to go to today's date OR use `textcal --show 05-02` to go to May 2nd.
+positional arguments:
+  {create,open}  Commands
+    create       Create new calendar
+    open         Open calendat at date
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --version      show program's version number and exit
+```

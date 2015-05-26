@@ -9,7 +9,7 @@ A plain text calendar generator.
 __author__ = "Edward Larkey <edwlarkey@gmail.com>"
 __copyright__ = "Copyright (c) 2014-2015 Edward Larkey"
 __license__ = "GPL Version 3"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 import os
 import argparse
@@ -84,7 +84,7 @@ class Textcal(object):
         """Prints a text calendar of the year and month supplied."""
 
         cal = calendar.month(self.year, self.month)
-        print cal
+        print(cal)
 
     def print_days(self):
         """Prints each day in a month in the format:
@@ -119,15 +119,15 @@ class Textcal(object):
 
             # if it is the beginning of the week, print a new line first.
             if dayofweek == 'M':
-                print ""
-                print "%s  %s  :" % (strdate, dayofweek)
+                print("")
+                print("%s  %s  :" % (strdate, dayofweek))
             else:
-                print "%s  %s  :" % (strdate, dayofweek)
+                print("%s  %s  :" % (strdate, dayofweek))
 
             day += 1
 
         # print ^^ at the end of the month (used for gawk printing stop pattern)
-        print "^^\n"
+        print("^^\n")
 
     def open_calendar(self):
         """Open calendar to specified date"""

@@ -1,5 +1,7 @@
 # textcal
 
+Moved to [https://git.sr.ht/~edwlarkey/textcal](https://git.sr.ht/~edwlarkey/textcal)
+
 A plain text calendar generator
 
 ## Features
